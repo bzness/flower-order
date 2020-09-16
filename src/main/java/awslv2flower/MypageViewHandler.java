@@ -28,6 +28,7 @@ public class MypageViewHandler {
                 mypage.setOrderId(ordered.getId());
                 mypage.setFlowerName(ordered.getFlowerName());
                 mypage.setQty(ordered.getQty());
+                mypage.setStatus(ordered.getStatus());
                 // view 레파지 토리에 save
                 mypageRepository.save(mypage);
             }
@@ -136,6 +137,24 @@ public class MypageViewHandler {
                 for(Mypage mypage : mypageList){
                     // view 객체에 이벤트의 eventDirectValue 를 set 함
                     mypage.setStatus(shipCancelled.getStatus());
+                    // view 레파지 토리에 save
+                    mypageRepository.save(mypage);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenBaeminDeliveryStart_then_UPDATE_7(@Payload BaeminShipped baeminShipped) {
+        try {
+            if (baeminShipped.isMe()) {
+                // view 객체 조회
+                List<Mypage> mypageList = mypageRepository.findByOrderId(baeminShipped.getOrderId());
+                for(Mypage mypage : mypageList){
+                    // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    mypage.setStatus(baeminShipped.getStatus());
                     // view 레파지 토리에 save
                     mypageRepository.save(mypage);
                 }
